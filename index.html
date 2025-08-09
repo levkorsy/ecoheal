@@ -17,7 +17,11 @@
             display:flex; flex-direction:column;
         }
         header{
-            background:var(--brand); color:#fff; padding:.5rem 1rem; text-align:center; font-weight:600;
+            background:var(--brand); color:#fff; padding:1rem 1rem; text-align:center; font-weight:600;
+            display:flex; align-items:center; justify-content:center; gap:16px; min-height:60px;
+        }
+        .logo{
+            height:40px; width:auto; background:#fff; padding:8px; border-radius:8px;
         }
         .wrap{width:min(1100px,100%); margin:0 auto; padding:24px 16px 40px}
         h1{font-size:clamp(22px,3vw,36px); text-align:center; margin:32px 0 24px}
@@ -50,7 +54,7 @@
             margin-top:18px; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden; background:#fff;
             min-height:120px; display:none;
         }
-        iframe{display:block; width:100%; height:min(70vh,900px); border:0}
+        iframe{display:block; width:100%; height:min(40vh,500px); border:0}
         .state{display:flex; align-items:center; gap:8px; color:var(--muted); font-size:.95rem; padding:10px}
         .spinner{
             width:18px; height:18px; border:3px solid #cbd5e1; border-top-color:var(--brand);
@@ -62,7 +66,10 @@
     </style>
 </head>
 <body>
-<header>EcoHeal — Serial number lookup</header>
+<header>
+    <img src="https://ecoheal.net/cdn/shop/files/Ecoheal_logo-2.png?v=1724870435&width=270" alt="EcoHeal Logo" class="logo">
+    EcoHeal — Product verification
+</header>
 <main class="wrap">
     <h1>Serial number lookup / Authentication checker</h1>
 
@@ -73,7 +80,7 @@
                    placeholder="Enter your serial number here"
                    aria-describedby="help"
                    maxlength="64"
-                   pattern="[A-Za-z0-9\-_.]{1,64}" />
+                    />
             <button class="btn" type="submit" id="submit">Go</button>
         </form>
         <div id="help" class="hint">Allowed: letters, numbers, dash, underscore, dot.</div>
@@ -101,8 +108,6 @@
     const status = document.getElementById('status');
     const error  = document.getElementById('error');
     const box    = document.getElementById('result');
-
-    const BASE = 'https://ecoheal.net/apps/product-registration';
 
     function setLoading(on) {
         status.style.display = on ? 'flex' : 'none';
