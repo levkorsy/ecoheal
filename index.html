@@ -1,132 +1,526 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Serial number lookup / Authentication checker</title>
     <style>
-        :root { --brand:#207a69; --brand-600:#1a6658; --text:#0f172a; --muted:#64748b; --bg:#ffffff; --card:#f8fafc; --radius:14px; }
-        *{box-sizing:border-box}
-        html,body{height:100%}
-        body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; color:var(--text); background:var(--bg); display:flex; flex-direction:column;}
-        header{background:var(--brand); color:#fff; padding:1rem; text-align:center; font-weight:600; display:flex; align-items:center; justify-content:center; gap:16px; min-height:60px;}
-        .logo{height:40px; width:auto; background:#fff; padding:8px; border-radius:8px;}
-        .wrap{width:min(1100px,100%); margin:0 auto; padding:24px 16px 40px}
-        h1{font-size:clamp(22px,3vw,36px); text-align:center; margin:32px 0 24px}
-        .card{background:var(--card); border:1px solid #e2e8f0; border-radius:var(--radius); padding:16px; box-shadow:0 8px 20px rgba(2,8,23,.04);}
-        form{display:grid; grid-template-columns: 1fr auto; gap:12px; align-items:center; margin:8px 0;}
-        @media (max-width:560px){ form{ grid-template-columns:1fr; } }
-        label{position:absolute; left:-9999px}
-        input[type="text"]{width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:12px; font-size:16px; outline:none; transition:border-color .15s, box-shadow .15s;}
-        input[type="text"]:focus{border-color:var(--brand); box-shadow:0 0 0 4px color-mix(in srgb, var(--brand) 20%, transparent);}
-        .btn{padding:14px 20px; background:var(--brand); color:#fff; border:none; border-radius:12px; font-weight:600; cursor:pointer; font-size:16px; min-width:96px; transition:transform .02s, background .15s;}
-        .btn:active{ transform: translateY(1px); } .btn:hover{ background:var(--brand-600); }
-        .hint{color:var(--muted); font-size:.9rem; margin-top:6px}
-        .state{display:none; align-items:center; gap:8px; color:var(--muted); font-size:.95rem; padding:10px}
-        .spinner{width:18px; height:18px; border:3px solid #cbd5e1; border-top-color:var(--brand); border-radius:50%; animation:spin 1s linear infinite}
-        @keyframes spin{to{transform:rotate(360deg)}}
-        .bad{color:#b91c1c}
-        .result{margin-top:18px; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden; background:#fff; min-height:120px; display:none}
-        iframe{display:block; width:100%; border:0}
-        footer{margin-top:auto; padding:14px; text-align:center; color:var(--muted); font-size:.9rem}
+      :root {
+        --brand: #207a69;
+        --brand-600: #1a6658;
+        --text: #0f172a;
+        --muted: #64748b;
+        --bg: #ffffff;
+        --card: #f8fafc;
+        --radius: 14px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu,
+          "Helvetica Neue", Arial, sans-serif;
+        color: var(--text);
+        background: var(--bg);
+        display: flex;
+        flex-direction: column;
+      }
+      header {
+        background: var(--brand);
+        color: #fff;
+        padding: 1rem;
+        text-align: center;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        min-height: 60px;
+      }
+      .logo {
+        height: 40px;
+        width: auto;
+        background: #fff;
+        padding: 8px;
+        border-radius: 8px;
+      }
+      .wrap {
+        width: min(1100px, 100%);
+        margin: 0 auto;
+        padding: 24px 16px 40px;
+      }
+      h1 {
+        font-size: clamp(22px, 3vw, 36px);
+        text-align: center;
+        margin: 32px 0 24px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid #e2e8f0;
+        border-radius: var(--radius);
+        padding: 16px;
+        box-shadow: 0 8px 20px rgba(2, 8, 23, 0.04);
+      }
+      form {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        align-items: center;
+        margin: 8px 0;
+      }
+      @media (max-width: 560px) {
+        form {
+          grid-template-columns: 1fr;
+        }
+      }
+      label {
+        position: absolute;
+        left: -9999px;
+      }
+      input[type="text"] {
+        width: 100%;
+        padding: 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        font-size: 16px;
+        outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+      }
+      input[type="text"]:focus {
+        border-color: var(--brand);
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 20%, transparent);
+      }
+      .btn {
+        padding: 14px 20px;
+        background: var(--brand);
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 16px;
+        min-width: 96px;
+        transition: transform 0.02s, background 0.15s;
+      }
+      .btn:active {
+        transform: translateY(1px);
+      }
+      .btn:hover {
+        background: var(--brand-600);
+      }
+      .hint {
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin-top: 6px;
+      }
+      .state {
+        display: none;
+        align-items: center;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 0.95rem;
+        padding: 10px;
+      }
+      .spinner {
+        width: 18px;
+        height: 18px;
+        border: 3px solid #cbd5e1;
+        border-top-color: var(--brand);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .bad {
+        color: #b91c1c;
+      }
+      .result {
+        margin-top: 18px;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #fff;
+        min-height: 120px;
+        display: none;
+      }
+      iframe {
+        display: block;
+        width: 100%;
+        border: 0;
+      }
+      footer {
+        margin-top: auto;
+        padding: 14px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
     </style>
-    <link rel="icon" href="//ecoheal.net/cdn/shop/files/favicon_aa7a1eaf-f207-46ed-b5e1-396a81b29b76.png?crop=center&amp;height=48&amp;v=1724869205&amp;width=48" type="image/png">
-</head>
-<body>
-<header>
-    <img src="https://ecoheal.net/cdn/shop/files/Ecoheal_logo-2.png?v=1724870435&width=270" alt="EcoHeal Logo" class="logo">
-    EcoHeal — Product verification
-</header>
+    <link
+      rel="icon"
+      href="//ecoheal.net/cdn/shop/files/favicon_aa7a1eaf-f207-46ed-b5e1-396a81b29b76.png?crop=center&amp;height=48&amp;v=1724869205&amp;width=48"
+      type="image/png"
+    />
+  </head>
+  <body>
+    <header>
+      <img
+        src="https://ecoheal.net/cdn/shop/files/Ecoheal_logo-2.png?v=1724870435&width=270"
+        alt="EcoHeal Logo"
+        class="logo"
+      />
+      EcoHeal — Product verification
+    </header>
 
-<main class="wrap">
-    <h1>Serial number lookup / Authentication checker</h1>
+    <main class="wrap">
+      <h1>Serial number lookup / Authentication checker</h1>
 
-    <section class="card">
+      <section class="card">
         <form id="lookup-form" autocomplete="off" novalidate>
-            <label for="serial">Enter your serial number</label>
-            <input id="serial" name="serial" type="text" placeholder="Enter your serial number here" maxlength="64" />
-            <button class="btn" type="submit" id="submit">Go</button>
+          <label for="serial">Enter your serial number</label>
+          <input
+            id="serial"
+            name="serial"
+            type="text"
+            placeholder="Enter your serial number here"
+            maxlength="64"
+          />
+          <button class="btn" type="submit" id="submit">Go</button>
         </form>
-        <div class="hint">Allowed: letters, numbers, dash, underscore, dot.</div>
+        <div class="hint">
+          Allowed: letters, numbers, dash, underscore, dot.
+        </div>
 
         <div id="status" class="state" role="status" aria-live="polite">
-            <div class="spinner" aria-hidden="true"></div><span>Checking…</span>
+          <div class="spinner" aria-hidden="true"></div>
+          <span>Checking…</span>
         </div>
 
         <div id="result" class="result" aria-live="polite"></div>
         <div id="error" class="state bad" role="alert"></div>
-    </section>
-</main>
+      </section>
+      <div class="faqs">
+        <div class="faq"><h2 class="title">Usage Questions</h2></div>
+        <div class="faq-items">
+          <div class="faq-item">
+            <h3>How do I use a grounding sheet?</h3>
+            <ol>
+              <li>
+                <span>Prepare Your Bed:</span> Remove your current fitted sheet
+                from your mattress.
+              </li>
+              <li>
+                <span>Place the Grounding Sheet:</span> Put the ECOHEAL
+                grounding fitted sheet on your mattress just like you would a
+                regular fitted sheet. Make sure it is snug and secure, with the
+                elastic corners tucked in.
+              </li>
+              <li>
+                <span>Connect the Grounding Cord:</span> Locate the connection
+                point on the grounding sheet (usually a small tab or pocket).
+                Insert the metal snap on the grounding cord into this connection
+                point.
+              </li>
+              <li>
+                <span>Ground the Cord:</span> Plug the other end of the
+                grounding cord into the grounding port of a properly grounded
+                outlet. You can use an outlet tester to verify that the outlet
+                is grounded. If you are unsure, consult an electrician.
+              </li>
+              <li>
+                <span>Make Skin Contact:</span> Lie down on the grounding sheet,
+                ensuring your bare skin is in direct contact with the fabric.
+                You can sleep directly on the grounding sheet or place a regular
+                sheet on top.
+              </li>
+              <li>
+                <span>Relax and Enjoy:</span> Relax and enjoy the benefits of
+                grounding as you sleep.
+              </li>
+            </ol>
+          </div>
+          <div class="faq-item">
+            <h3>How do I connect the sheet to ground?</h3>
+            <ol>
+              <li>
+                <span>Locate the Connection Point:</span> Find the small tab or
+                pocket on your grounding sheet designed to connect the grounding
+                cord.
+              </li>
+              <li>
+                <span>Secure the Cord:</span> Insert the metal snap on the
+                grounding cord into the connection point on the sheet. Make sure
+                the connection is secure.
+              </li>
+              <li>
+                <span>Plug into Outlet:</span> Plug the other end of the cord
+                into a properly grounded wall outlet. To verify that your outlet
+                is grounded, you can use a simple outlet tester, available at
+                most hardware stores. If you are unsure about grounding, consult
+                a qualified electrician.
+              </li>
+            </ol>
+          </div>
+          <div class="faq-item">
+            <h3>Can I use a grounding sheet with other bedding?</h3>
+            <p>
+              Absolutely! You can use your ECOHEAL grounding sheet with any
+              other bedding you prefer. Feel free to layer it under your
+              favorite sheets, blankets, or duvet covers.
+            </p>
+          </div>
+          <div class="faq-item">
+            <h3>Can I wash my grounding sheet? If so, how?</h3>
+            <p>
+              Yes, you can machine wash your ECOHEAL grounding sheet. Follow
+              these steps:
+            </p>
+            <ol>
+              <li>
+                <span>Disconnect:</span> Unplug the grounding cord from both the
+                sheet and the outlet.
+              </li>
+              <li>
+                <span>Wash:</span> Place the sheet in your washing machine. Use
+                cold water and a gentle cycle.
+              </li>
+              <li>
+                <span>Detergent:</span> Use a mild, natural detergent free of
+                bleach or fabric softener.
+              </li>
+              <li>
+                <span>Dry:</span> Tumble dry on low heat or air dry. Avoid using
+                high heat, as it may damage the conductive fibers in the sheet.
+              </li>
+            </ol>
+          </div>
+          <div class="faq-item">
+            <h3>How often should I wash my grounding sheet?</h3>
+            <p>
+              Recommendation: Wash your grounding sheet every 1-2 weeks, or more
+              often if needed, to maintain hygiene and conductivity.
+            </p>
+          </div>
+          <div class="faq-item">
+            <h3>Can I use a grounding sheet if I have sensitive skin?</h3>
+            <p>
+              ECOHEAL grounding sheets are made with 100% organic cotton, which
+              is gentle on sensitive skin. The silver threads used for
+              conductivity are also hypoallergenic. However, if you experience
+              any irritation, discontinue use and consult your doctor.
+            </p>
+          </div>
+          <div class="faq-item">
+            <h3>Do I need to use a special outlet for my grounding sheet?</h3>
+            <p>
+              Your grounding sheet should be plugged into a properly grounded
+              outlet. Most standard household outlets are grounded, but you can
+              verify this with an outlet tester. If you have any concerns,
+              consult an electrician.
+            </p>
+          </div>
+          <div class="faq-item">
+            <h3>Can I use my grounding sheet on an adjustable bed?</h3>
+            <p>
+              Yes, you can use your ECOHEAL grounding sheet on an adjustable
+              bed. The fitted design and elastic corners will keep it secure
+              even when you adjust the bed's position.
+            </p>
+          </div>
+          <div class="faq-item">
+            <h3>Can I travel with my grounding sheet?</h3>
+            <p>
+              Yes, you can travel with your grounding sheet. It's lightweight
+              and portable. However, make sure you have access to a grounded
+              outlet at your destination to use it.
+            </p>
+          </div>
+          <div class="faq-item">
+            <h3>
+              What if I feel a tingling sensation while using the grounding
+              sheet?
+            </h3>
+            <p>
+              A slight tingling sensation is normal for some people when they
+              first start using a grounding sheet. This is due to the flow of
+              electrons from the Earth into your body. The sensation usually
+              subsides quickly. If it persists or becomes uncomfortable,
+              discontinue use and consult your doctor.
+            </p>
+          </div>
+          <div class="faq-item">
+            <h3>
+              Can I use a grounding sheet if I have a pet that sleeps in my bed?
+            </h3>
+            <p>
+              Yes, grounding sheets are safe for pets. In fact, many pet owners
+              report that their animals also seem to enjoy the benefits of
+              grounding.
+            </p>
+          </div>
+          <div class="faq-item">
+            <h3>Are there any contraindications for using grounding sheets?</h3>
+            <p>
+              Grounding sheets are generally safe for most people. However, if
+              you have any medical conditions (especially those related to the
+              heart or taking medications that affect blood clotting), consult
+              your doctor before use.
+            </p>
+          </div>
+          <div class="faq-item">
+            <h3>What is grounding (earthing) and how does it work?</h3>
+            <p>
+              Grounding is the process of connecting your body to the Earth's
+              surface. This allows the natural flow of electrons from the Earth
+              to neutralize positive charges in your body, which can build up
+              due to exposure to electromagnetic fields and other factors.
+            </p>
+          </div>
+          <div class="faq-item">
+            <h3>Who can benefit from ECOHEAL grounding sheets?</h3>
+            <p>
+              ECOHEAL grounding sheets are suitable for anyone looking to
+              improve sleep quality and overall well-being. They are especially
+              beneficial for people suffering from insomnia, chronic pain,
+              stress, and fatigue.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="instructions"></div>
+    </main>
 
-<footer>© <span id="y"></span> EcoHeal verification helper</footer>
+    <footer>© <span id="y"></span> EcoHeal verification helper</footer>
 
-<script>
-    document.getElementById('y').textContent = new Date().getFullYear();
+    <script>
+      document.getElementById("y").textContent = new Date().getFullYear();
 
-    const form   = document.getElementById('lookup-form');
-    const input  = document.getElementById('serial');
-    const status = document.getElementById('status');
-    const error  = document.getElementById('error');
-    const box    = document.getElementById('result');
+      const form = document.getElementById("lookup-form");
+      const input = document.getElementById("serial");
+      const status = document.getElementById("status");
+      const error = document.getElementById("error");
+      const box = document.getElementById("result");
 
-    // URL твоего Cloudflare Worker
-    const API = 'https://misty-dew-46bc.levkorsy.workers.dev/api/verify';
+      // URL твоего Cloudflare Worker
+      const API = "https://misty-dew-46bc.levkorsy.workers.dev/api/verify";
 
-    function setLoading(on) {
-        status.style.display = on ? 'flex' : 'none';
-        error.style.display  = 'none';
-        if (on) box.style.display = 'none';
-    }
-    function showError(msg) {
-        status.style.display = 'none';
+      function setLoading(on) {
+        status.style.display = on ? "flex" : "none";
+        error.style.display = "none";
+        if (on) box.style.display = "none";
+      }
+      function showError(msg) {
+        status.style.display = "none";
         error.textContent = msg;
-        error.style.display = 'flex';
-        box.style.display = 'none';
-    }
+        error.style.display = "flex";
+        box.style.display = "none";
+      }
 
-    async function verifySerial(serial) {
-        const res = await fetch(`${API}?serial=${encodeURIComponent(serial)}`, { method: 'GET' });
+      async function verifySerial(serial) {
+        const res = await fetch(`${API}?serial=${encodeURIComponent(serial)}`, {
+          method: "GET",
+        });
         if (!res.ok) throw new Error(`API ${res.status}`);
         return res.json();
-    }
+      }
 
-    function renderHtmlIsolated(html) {
+      function renderHtmlIsolated(html) {
         // безопасная изоляция: вставляем в sandboxed iframe через srcdoc
-        const iframe = document.createElement('iframe');
-        iframe.setAttribute('sandbox', 'allow-forms allow-same-origin'); // без скриптов
-        iframe.style.width = '100%';
-        iframe.style.minHeight = '120px';
-        iframe.srcdoc = `<!doctype html><meta charset="utf-8">${html || '<em>No data</em>'}`;
+        const iframe = document.createElement("iframe");
+        iframe.setAttribute("sandbox", "allow-forms allow-same-origin"); // без скриптов
+        iframe.style.width = "100%";
+        iframe.style.minHeight = "120px";
+        iframe.srcdoc = `<!doctype html><meta charset="utf-8">${
+          html || "<em>No data</em>"
+        }`;
         iframe.onload = () => {
-            // авто-высота по содержимому
-            try {
-                const h = iframe.contentWindow.document.body.scrollHeight || 300;
-                iframe.style.height = Math.max(180, Math.min(h, 900)) + 'px';
-            } catch (_) { iframe.style.height = '420px'; }
+          // авто-высота по содержимому
+          try {
+            const h = iframe.contentWindow.document.body.scrollHeight || 300;
+            iframe.style.height = Math.max(180, Math.min(h, 900)) + "px";
+          } catch (_) {
+            iframe.style.height = "420px";
+          }
         };
         box.replaceChildren(iframe);
-        box.style.display = 'block';
-    }
+        box.style.display = "block";
+      }
 
-    form.addEventListener('submit', async (e) => {
+      form.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const value = (input.value || '').trim();
-        if (!value) { showError('Please enter a serial number.'); input.focus(); return; }
+        const value = (input.value || "").trim();
+        if (!value) {
+          showError("Please enter a serial number.");
+          input.focus();
+          return;
+        }
         // if (!/^[A-Za-z0-9\-_.]{1,64}$/.test(value)) { showError('Invalid format. Use letters, numbers, dash, underscore or dot.'); input.focus(); return; }
 
         setLoading(true);
         try {
-            const data = await verifySerial(value);
-            setLoading(false);
-            renderHtmlIsolated(data?.html);
+          const data = await verifySerial(value);
+          setLoading(false);
+          renderHtmlIsolated(data?.html);
         } catch (err) {
-            showError('Request failed: ' + err.message);
+          showError("Request failed: " + err.message);
         }
-    });
+      });
 
-    input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); form.requestSubmit(); }
-    });
-</script>
-</body>
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          form.requestSubmit();
+        }
+      });
+    </script>
+
+    <style scoped>
+      .faqs {
+        margin-top: 2rem;
+        border-top: 1px solid #eee;
+        padding-top: 1rem;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .faq {
+        display: flex;
+        justify-content: center;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+      .faq-items {
+        margin-top: 1rem;
+        border-top: 1px solid #eee;
+        padding-top: 1rem;
+      }
+
+      .faq-item {
+        padding: 0.5rem 0;
+      }
+
+      ol {
+        padding-left: 1.5rem;
+        margin-top: 0.5rem;
+        li {
+          margin-bottom: 0.5rem;
+        }
+      }
+
+      span {
+        font-weight: bold;
+      }
+    </style>
+  </body>
 </html>
